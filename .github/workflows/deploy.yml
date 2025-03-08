@@ -1,5 +1,5 @@
 name: Deploy to Server
-on: [push]
+于: [push]
 
 jobs:
   deploy:
@@ -8,8 +8,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
+      - name: SSH into server and pull code
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ SERVER_USERNAME }}
