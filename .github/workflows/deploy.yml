@@ -7,23 +7,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 步骤1：检出仓库代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 步骤2：同步 www 目录到服务器（覆盖式传输）
       - name: Sync www directory to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "www/"          # 仓库中的 www 目录
-          target: "/var"          # 目标路径：/var/www（会自动拼接）
-          overwrite: true         # 强制覆盖同名文件
-          rm: true                # 删除目标目录中多余的文件（严格同步）
+          source: "www/"         
+          target: "/var"         
+          overwrite: true        
+          rm: true               
 
-      # 步骤3：通过 SSH 执行后续命令
       - name: Restart services & install deps
         uses: appleboy/ssh-action@master
         with:
@@ -31,12 +28,9 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            # 进入目录并安装依赖（示例为后端 Node.js）
             cd /var/www/backend
             npm install --production
             
-            # 重启 Nginx 确保前端生效
             sudo systemctl restart nginx
             
-            # 若有后端服务（如 PM2 管理的进程）
             pm2 restart all
