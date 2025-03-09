@@ -1,0 +1,39 @@
+/var/www
+├── frontend/              # 前端代码（构建后输出至此）
+│   ├── dist/   
+│   │   ├── index.html           # 首页
+│   │   ├── pages/               # 统一存放子页面
+│   │   │   ├── about.html     # 关于页
+│   │   │   ├── ······
+│   │   │   └── blog/               # 博客相关资源
+│   │   │       ├── index.html    # 博客列表页
+│   │   │       └── post1.html    # 单篇博客页
+│   │   └── 404.html                # 404页面
+│   │   ├── favicon.ico       # 网站图标
+│   │   └── assets/           # 公共静态资源
+│   │       ├── css/          # 全局样式
+│   │       ├── js/           # 全局脚本（如第三方库）
+│   │       └── images/       # 公共图片
+│   └── src/              # 源码目录（Vue/React等）
+│        ├── assets/       # 图片、字体等
+│        ├── components/   # 可复用组件（如React/Vue组件）
+│        ├── pages/            # 页面模块（按路由划分）
+│        ├── styles/           # 样式源码（SASS/LESS等）
+│        ├── scripts/          # 业务逻辑脚本
+│        ├── utils/            # 工具函数
+│        └── api/          # 前端API请求封装
+│
+├── backend/              # 后端代码（如Node.js/Python）
+│   ├── server/              # Node.js主文件
+│   ├── mysql/           # 数据库模型
+│   ├── routes/           # API路由
+│   ├── src/              # 业务逻辑
+│   │   ├── routes/       # API路由
+│   │   ├── models/       # 数据库模型
+│   │   └── utils/        # 工具类
+│   ├── package.json        # 依赖配置
+│   ├── config/           # 环境配置
+│   └── uploads/          # 用户上传文件（需设置权限）
+│
+├── logs/                 # Nginx及后端日志
+└── .env                  # 敏感配置（添加到.gitignore）

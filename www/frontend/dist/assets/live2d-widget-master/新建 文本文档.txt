@@ -1,0 +1,434 @@
+看板娘一词源自日语“看板娘（かんばんむすめ）”。其中的“看板”指的是店面招牌，或者是为了宣传、打广告而制作的宣传牌。“看板娘”也就是店面的招牌姑娘，亦即能够提升店面人气和顾客流量的女服务生、女店员等。也就是说，看板娘本身就是一块“活看板”，其本身的魅力就能够起到宣传、拉人气的作用。英语又称之为“Yuru-chara”
+
+看板娘一词并不是正式的职业名称，而是一种习惯称呼，多用于饮食行业的餐馆、咖啡店等，有时也用于超市、小卖店等店面。该概念上的看板娘是狭义的看板娘，从职业上讲，属于女服务生、女店员等的范畴。
+
+另外，有时也把店面外树立的等身大的人型牌子的角色称作看板娘。
+
+本项目使用到GitHub开源项目live2d-widget|把萌萌哒的看板娘抱回家 (ノ≧∇≦)ノ，我对原项目做出如下优化：
+
+添加更多模型，自定义模型大小，位置
+将项目放入hexo主题文件内，不再使用远程调用的方式获取，提升模型加载速度（大概）
+自定义看板娘教程
+1.下载live2d
+首先进入原作者GitHub仓库，下载整个项目文件，放入主题文件夹下的\source\live2d-widget-master 内（新建文件夹）,如下图所示：
+
+依赖放入主题内
+
+然后将live2d-widget-master文件夹内的autoload.js代码替换为如下：
+
+// live2d_path 参数建议使用绝对路径
+//const live2d_path = "https://fastly.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/";
+const live2d_path = "/live2d-widget-master/";
+
+// 封装异步加载资源的方法
+function loadExternalResource(url, type) {
+	return new Promise((resolve, reject) => {
+		let tag;
+
+		if (type === "css") {
+			tag = document.createElement("link");
+			tag.rel = "stylesheet";
+			tag.href = url;
+		}
+		else if (type === "js") {
+			tag = document.createElement("script");
+			tag.src = url;
+		}
+		if (tag) {
+			tag.onload = () => resolve(url);
+			tag.onerror = () => reject(url);
+			document.head.appendChild(tag);
+		}
+	});
+}
+
+// 加载 waifu.css live2d.min.js waifu-tips.js
+if (screen.width >= 768) {
+	Promise.all([
+		loadExternalResource(live2d_path + "waifu.css", "css"),
+		loadExternalResource(live2d_path + "live2d.min.js", "js"),
+		loadExternalResource(live2d_path + "waifu-tips.js", "js")
+	]).then(() => {
+		// 配置选项的具体用法见 README.md
+		initWidget({
+			waifuPath: live2d_path + "waifu-tips.json",
+			//apiPath: "https://live2d.fghrsh.net/api/",
+			cdnPath: "/live2d_api/",
+			tools: ["hitokoto", "asteroids", "switch-model", "photo", "info", "quit"]
+		});
+	});
+}
+
+2.下载Live2D看板娘插件上使用的后端 API
+下载live2d_api完整项目，放入主题文件夹下的\source\live2d_api中（新建文件夹），如下图所示：
+下载后端api
+
+3.修改主题配置文件
+打开主题配置文件，添加如下代码：
+
+live2d:
+  enable: true
+并在inject的head中插入如下代码，引入js文件
+
+- <script defer src="/live2d-widget-master/autoload.js"></script>
+如下图所示：
+
+图片
+
+此时重新部署hexo即可看见效果
+
+自定义配置
+更换模型
+将看板娘模型放入主题文件内的\source\live2d_api\model文件夹内，并按照如下推荐修改大小，位置。
+
+"width": 1.8
+"center_x": 0,
+"center_y": 0,
+添加如下代码；
+
+"hit_areas_custom":{
+	"head_x":[-0.35, 0.6],
+	"head_y":[0.19, -0.2],
+	"body_x":[-0.3, -0.25],
+	"body_y":[0.3, -0.9]
+}
+如果按照上述推荐修改好，应该能解决部分模型过大导致的超出屏幕边界问题
+
+修改欢迎语
+每个模型都可以设置自己的欢迎语，打开主题文件内的\source\live2d_api\model_list.json文件
+
+该文件语法如下：
+
+{
+    "models": [
+        "模型1文件名",
+        "模型2文件名"
+    ],
+    "messages": [
+        "模型1欢迎语",
+        "模型2欢迎语"
+    
+    ]
+}
+将看板娘放置在右侧
+看板娘默认是在网页左侧，如果想修改为网页右侧打开主题文件内的source\live2d-widget-master\waifu.css
+
+修改为：
+
+#waifu-toggle {
+	background-color: #fa0;
+	border-radius: 5px;
+	bottom: 66px;
+	color: #fff;
+	cursor: pointer;
+	font-size: 12px;
+	left: 0;
+	margin-left: -100px;
+	padding: 5px 2px 5px 5px;
+	position: fixed;
+	transition: margin-left 1s;
+	width: 60px;
+	writing-mode: vertical-rl;
+}
+
+#waifu-toggle.waifu-toggle-active {
+	margin-left: -50px;
+}
+
+#waifu-toggle.waifu-toggle-active:hover {
+	margin-left: -30px;
+}
+
+#waifu {
+	bottom: -1000px;
+	right: 0;
+	line-height: 0;
+	margin-bottom: -10px;
+	position: fixed;
+	transform: translateY(3px);
+	transition: transform .3s ease-in-out, bottom 3s ease-in-out;
+	z-index: 1;
+}
+
+#waifu:hover {
+	transform: translateY(0);
+}
+
+#waifu-tips {
+	animation: shake 50s ease-in-out 5s infinite;
+	background-color: rgba(236, 217, 188, .5);
+	border: 1px solid rgba(224, 186, 140, .62);
+	border-radius: 12px;
+	box-shadow: 0 3px 15px 2px rgba(191, 158, 118, .2);
+	font-size: 14px;
+	line-height: 24px;
+	margin: -30px 20px;
+	min-height: 70px;
+	opacity: 0;
+	overflow: hidden;
+	padding: 5px 10px;
+	position: absolute;
+	text-overflow: ellipsis;
+	transition: opacity 1s;
+	width: 250px;
+	word-break: break-all;
+}
+
+#waifu-tips.waifu-tips-active {
+	opacity: 1;
+	transition: opacity .2s;
+}
+
+#waifu-tips span {
+	color: #0099cc;
+}
+
+#live2d {
+	cursor: grab;
+	height: 300px;
+	position: relative;
+	width: 300px;
+}
+
+#live2d:active {
+	cursor: grabbing;
+}
+
+#waifu-tool {
+	color: #aaa;
+	opacity: 0;
+	position: absolute;
+	left: -10px;
+	top: 70px;
+	transition: opacity 1s;
+}
+
+#waifu:hover #waifu-tool {
+	opacity: 1;
+}
+
+#waifu-tool span {
+	display: block;
+	height: 30px;
+	text-align: center;
+}
+
+#waifu-tool svg {
+	fill: #7b8c9d;
+	cursor: pointer;
+	height: 25px;
+	transition: fill .3s;
+}
+
+#waifu-tool svg:hover {
+	fill: #0684bd; /* #34495e */
+}
+
+@keyframes shake {
+	2% {
+		transform: translate(.5px, -1.5px) rotate(-.5deg);
+	}
+
+	4% {
+		transform: translate(.5px, 1.5px) rotate(1.5deg);
+	}
+
+	6% {
+		transform: translate(1.5px, 1.5px) rotate(1.5deg);
+	}
+
+	8% {
+		transform: translate(2.5px, 1.5px) rotate(.5deg);
+	}
+
+	10% {
+		transform: translate(.5px, 2.5px) rotate(.5deg);
+	}
+
+	12% {
+		transform: translate(1.5px, 1.5px) rotate(.5deg);
+	}
+
+	14% {
+		transform: translate(.5px, .5px) rotate(.5deg);
+	}
+
+	16% {
+		transform: translate(-1.5px, -.5px) rotate(1.5deg);
+	}
+
+	18% {
+		transform: translate(.5px, .5px) rotate(1.5deg);
+	}
+
+	20% {
+		transform: translate(2.5px, 2.5px) rotate(1.5deg);
+	}
+
+	22% {
+		transform: translate(.5px, -1.5px) rotate(1.5deg);
+	}
+
+	24% {
+		transform: translate(-1.5px, 1.5px) rotate(-.5deg);
+	}
+
+	26% {
+		transform: translate(1.5px, .5px) rotate(1.5deg);
+	}
+
+	28% {
+		transform: translate(-.5px, -.5px) rotate(-.5deg);
+	}
+
+	30% {
+		transform: translate(1.5px, -.5px) rotate(-.5deg);
+	}
+
+	32% {
+		transform: translate(2.5px, -1.5px) rotate(1.5deg);
+	}
+
+	34% {
+		transform: translate(2.5px, 2.5px) rotate(-.5deg);
+	}
+
+	36% {
+		transform: translate(.5px, -1.5px) rotate(.5deg);
+	}
+
+	38% {
+		transform: translate(2.5px, -.5px) rotate(-.5deg);
+	}
+
+	40% {
+		transform: translate(-.5px, 2.5px) rotate(.5deg);
+	}
+
+	42% {
+		transform: translate(-1.5px, 2.5px) rotate(.5deg);
+	}
+
+	44% {
+		transform: translate(-1.5px, 1.5px) rotate(.5deg);
+	}
+
+	46% {
+		transform: translate(1.5px, -.5px) rotate(-.5deg);
+	}
+
+	48% {
+		transform: translate(2.5px, -.5px) rotate(.5deg);
+	}
+
+	50% {
+		transform: translate(-1.5px, 1.5px) rotate(.5deg);
+	}
+
+	52% {
+		transform: translate(-.5px, 1.5px) rotate(.5deg);
+	}
+
+	54% {
+		transform: translate(-1.5px, 1.5px) rotate(.5deg);
+	}
+
+	56% {
+		transform: translate(.5px, 2.5px) rotate(1.5deg);
+	}
+
+	58% {
+		transform: translate(2.5px, 2.5px) rotate(.5deg);
+	}
+
+	60% {
+		transform: translate(2.5px, -1.5px) rotate(1.5deg);
+	}
+
+	62% {
+		transform: translate(-1.5px, .5px) rotate(1.5deg);
+	}
+
+	64% {
+		transform: translate(-1.5px, 1.5px) rotate(1.5deg);
+	}
+
+	66% {
+		transform: translate(.5px, 2.5px) rotate(1.5deg);
+	}
+
+	68% {
+		transform: translate(2.5px, -1.5px) rotate(1.5deg);
+	}
+
+	70% {
+		transform: translate(2.5px, 2.5px) rotate(.5deg);
+	}
+
+	72% {
+		transform: translate(-.5px, -1.5px) rotate(1.5deg);
+	}
+
+	74% {
+		transform: translate(-1.5px, 2.5px) rotate(1.5deg);
+	}
+
+	76% {
+		transform: translate(-1.5px, 2.5px) rotate(1.5deg);
+	}
+
+	78% {
+		transform: translate(-1.5px, 2.5px) rotate(.5deg);
+	}
+
+	80% {
+		transform: translate(-1.5px, .5px) rotate(-.5deg);
+	}
+
+	82% {
+		transform: translate(-1.5px, .5px) rotate(-.5deg);
+	}
+
+	84% {
+		transform: translate(-.5px, .5px) rotate(1.5deg);
+	}
+
+	86% {
+		transform: translate(2.5px, 1.5px) rotate(.5deg);
+	}
+
+	88% {
+		transform: translate(-1.5px, .5px) rotate(1.5deg);
+	}
+
+	90% {
+		transform: translate(-1.5px, -.5px) rotate(-.5deg);
+	}
+
+	92% {
+		transform: translate(-1.5px, -1.5px) rotate(1.5deg);
+	}
+
+	94% {
+		transform: translate(.5px, .5px) rotate(-.5deg);
+	}
+
+	96% {
+		transform: translate(2.5px, -.5px) rotate(-.5deg);
+	}
+
+	98% {
+		transform: translate(-1.5px, -1.5px) rotate(-.5deg);
+	}
+
+	0%, 100% {
+		transform: translate(0, 0) rotate(0);
+	}
+}
+
+一些模型下载链接
+这里将放置一些开源的或免费的模型下载地址，欢迎评论区补充
+
+https://gitee.com/rao_she/live2d_models_collect
+https://github.com/xiaoski/live2d_models_collection
+注意检查模型内的json文件是为名为：index.json ，如果不是请将它改为index.json再放入模型文件夹内。
